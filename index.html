@@ -1,32 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="si">
 <head>
   <meta charset="UTF-8">
-  <title>Player ID Checker</title>
+  <title>BiguuDev Player Checker</title>
 </head>
 <body>
 
-<h2>NovaTopup Player ID Check</h2>
+<h2>📊 BiguuDev Player ID Check</h2>
 
-<input id="playerId" placeholder="Enter Player ID" />
-<button onclick="check()">Check</button>
+<input id="playerId" placeholder="Player ID" />
+<button onclick="checkPlayer()">Check</button>
 
 <pre id="result"></pre>
 
 <script>
-async function check() {
-  const playerId = document.getElementById("playerId").value;
+async function checkPlayer() {
+  const playerId = document.getElementById("playerId").value.trim();
+  if (!playerId) {
+    document.getElementById("result").textContent = "Player ID";
+    return;
+  }
 
-  const res = await fetch("/api/novatopup", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: "player_id=" + encodeURIComponent(playerId)
-  });
+  try {
+    const res = await fetch(
+      "https://www.novatopup.com/api/verify_dynamic",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `game_id=1&player_id=${encodeURIComponent(playerId)}`
+      }
+    );
 
-  const text = await res.text();
-  document.getElementById("result").textContent = text;
+    if (!res.ok) {
+      document.getElementById("result").textContent = "Request error: " + res.status;
+      return;
+    }
+
+    const data = await res.json();
+
+    document.getElementById("result").textContent =
+      `📌 Nickname: ${data.nickname}\n🆔 Player ID: ${data.player_id}\n✔️ Success: ${data.success}`;
+
+  } catch (err) {
+    document.getElementById("result").textContent = "Error: " + err.message;
+  }
 }
 </script>
 
